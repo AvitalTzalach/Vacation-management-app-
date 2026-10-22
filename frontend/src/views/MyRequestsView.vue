@@ -82,8 +82,8 @@ onMounted(loadRequests);
 <template>
   <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
     <!-- New request -->
-    <section class="card p-6 sm:p-8" aria-labelledby="new-request-title">
-      <h2 id="new-request-title" class="text-xl font-semibold text-stone-900">New request</h2>
+    <section class="card p-5 sm:p-6" aria-labelledby="new-request-title">
+      <h2 id="new-request-title" class="text-lg font-semibold text-stone-900">New request</h2>
 
       <div
         v-if="successMessage"
@@ -102,7 +102,7 @@ onMounted(loadRequests);
 
       <RequestForm
         ref="formRef"
-        class="mt-5"
+        class="mt-4"
         :submitting="submitting"
         :server-errors="fieldErrors"
         @submit="submitRequest"
@@ -110,15 +110,15 @@ onMounted(loadRequests);
     </section>
 
     <!-- My requests -->
-    <section class="card p-6 sm:p-8" aria-labelledby="my-requests-title" :aria-busy="loading">
+    <section class="card p-5 sm:p-6" aria-labelledby="my-requests-title" :aria-busy="loading">
       <div class="flex items-baseline justify-between gap-4">
-        <h2 id="my-requests-title" class="text-xl font-semibold text-stone-900">My requests</h2>
+        <h2 id="my-requests-title" class="text-lg font-semibold text-stone-900">My requests</h2>
         <p v-if="result && result.meta.total > 0" class="text-sm text-stone-500">{{ result.meta.total }} total</p>
       </div>
 
       <!-- Loading (first load): skeleton rows -->
       <ul v-if="loading && !result" class="mt-4 divide-y divide-sand-200" aria-label="Loading requests">
-        <li v-for="n in 3" :key="n" class="flex items-center justify-between gap-4 py-5">
+        <li v-for="n in 3" :key="n" class="flex items-center justify-between gap-4 py-3.5">
           <div class="w-full space-y-2">
             <div class="h-4 w-2/3 animate-pulse rounded-full bg-sand-200" />
             <div class="h-3 w-1/3 animate-pulse rounded-full bg-sand-100" />
@@ -146,9 +146,9 @@ onMounted(loadRequests);
       <!-- List -->
       <template v-else-if="result">
         <ul class="mt-2 divide-y divide-sand-200 transition-opacity" :class="{ 'opacity-50': loading }">
-          <li v-for="request in result.data" :key="request.id" class="flex items-start justify-between gap-4 py-5">
+          <li v-for="request in result.data" :key="request.id" class="flex items-start justify-between gap-4 py-3.5">
             <div class="min-w-0">
-              <p class="text-stone-900">
+              <p class="text-sm text-stone-900 sm:text-base">
                 <span class="font-medium">{{ formatDate(request.startDate) }} → {{ formatDate(request.endDate) }}</span>
                 <span class="whitespace-nowrap text-stone-500"> · {{ countDays(request.startDate, request.endDate) }} days</span>
               </p>

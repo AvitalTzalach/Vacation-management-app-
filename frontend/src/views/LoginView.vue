@@ -71,25 +71,25 @@ function signInAs(accountEmail: string): void {
 <template>
   <div class="min-h-screen bg-sand-50 lg:grid lg:grid-cols-2">
     <!-- Photo panel -->
-    <aside class="relative isolate h-56 overflow-hidden sm:h-72 lg:h-auto lg:min-h-screen">
+    <aside class="relative isolate h-40 overflow-hidden sm:h-56 lg:h-auto lg:min-h-screen">
       <img
         :src="beachImage"
         alt="Calm turquoise sea and a sandy beach at sunset"
         class="absolute inset-0 -z-20 size-full object-cover object-[30%_center]"
       />
       <div class="absolute inset-0 -z-10 bg-gradient-to-t from-stone-900/55 via-stone-900/5 to-transparent" />
-      <div class="flex h-full flex-col justify-end p-6 sm:p-10 lg:p-14">
-        <p class="font-display text-4xl leading-tight text-white sm:text-5xl lg:text-6xl">Time off, made simple.</p>
-        <p class="mt-2 text-white/90 sm:text-lg">Plan your next break and keep your team in sync.</p>
+      <div class="flex h-full flex-col justify-end p-5 sm:p-8 lg:p-12">
+        <p class="font-display text-3xl leading-tight text-white sm:text-4xl lg:text-5xl">Time off, made simple.</p>
+        <p class="mt-1 text-sm text-white/90 sm:text-base">Plan your next break and keep your team in sync.</p>
       </div>
     </aside>
 
     <!-- Sign-in panel -->
-    <main class="flex items-center justify-center px-5 py-12 sm:px-8 lg:py-0">
-      <div class="w-full max-w-md">
-        <p class="font-display text-4xl text-brand-600">Away</p>
-        <h1 class="mt-6 text-2xl font-semibold text-stone-900">Welcome back</h1>
-        <p class="mt-1 text-stone-500">Sign in to manage vacation requests.</p>
+    <main class="flex items-center justify-center px-5 py-8 sm:px-8 lg:py-0">
+      <div class="w-full max-w-sm">
+        <p class="font-display text-3xl text-brand-600">Away</p>
+        <h1 class="mt-4 text-xl font-semibold text-stone-900">Welcome back</h1>
+        <p class="mt-0.5 text-sm text-stone-500">Sign in to manage vacation requests.</p>
 
         <div
           v-if="sessionExpired"
@@ -107,7 +107,7 @@ function signInAs(accountEmail: string): void {
           {{ errorMessage }}
         </div>
 
-        <form class="mt-6 space-y-5" novalidate @submit.prevent="submit">
+        <form class="mt-5 space-y-4" novalidate @submit.prevent="submit">
           <div>
             <label for="email" class="field-label">Email</label>
             <input
@@ -136,7 +136,7 @@ function signInAs(accountEmail: string): void {
           </button>
         </form>
 
-        <div class="mt-6 rounded-3xl bg-sand-100 p-5">
+        <div class="mt-5 rounded-2xl bg-sand-100 p-4">
           <p class="text-sm text-stone-600">
             Demo accounts (password: <span class="font-semibold text-stone-800">{{ DEMO_PASSWORD }}</span>)
           </p>

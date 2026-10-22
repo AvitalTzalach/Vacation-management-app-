@@ -74,7 +74,7 @@ defineExpose({ reset });
 </script>
 
 <template>
-  <form class="space-y-5" novalidate @submit.prevent="onSubmit">
+  <form class="space-y-4" novalidate @submit.prevent="onSubmit">
     <div class="grid gap-4 sm:grid-cols-2">
       <div>
         <label for="startDate" class="field-label">Start date *</label>
@@ -114,7 +114,7 @@ defineExpose({ reset });
       <textarea
         id="reason"
         v-model="form.reason"
-        rows="3"
+        rows="2"
         class="field-input resize-none"
         :class="{ 'field-input-error': errors.reason }"
         placeholder="Optional"

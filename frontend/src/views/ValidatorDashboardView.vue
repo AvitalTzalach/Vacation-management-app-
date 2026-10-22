@@ -205,7 +205,7 @@ onBeforeUnmount(() => clearTimeout(noticeTimer));
 </script>
 
 <template>
-  <section class="card p-6 sm:p-8" aria-labelledby="dashboard-title">
+  <section class="card p-5 sm:p-6" aria-labelledby="dashboard-title">
     <h2 id="dashboard-title" class="sr-only">All vacation requests</h2>
 
     <!-- Filters -->
@@ -269,7 +269,7 @@ onBeforeUnmount(() => clearTimeout(noticeTimer));
     <!-- Requests -->
     <DataTable
       v-else
-      class="mt-6"
+      class="mt-4"
       :columns="columns"
       :rows="result?.data ?? []"
       :row-key="(row) => row.id"
@@ -278,11 +278,11 @@ onBeforeUnmount(() => clearTimeout(noticeTimer));
       :empty-text="hasFilters ? 'Try another status or employee.' : 'Requests submitted by the team will appear here.'"
     >
       <template #cell-employee="{ row }">
-        <span class="font-medium text-stone-900">{{ row.user.name }}</span>
+        <span class="text-sm font-medium text-stone-900">{{ row.user.name }}</span>
       </template>
 
       <template #cell-dates="{ row }">
-        <p class="whitespace-nowrap text-stone-800">{{ formatDate(row.startDate) }} → {{ formatDate(row.endDate) }}</p>
+        <p class="whitespace-nowrap text-sm text-stone-800">{{ formatDate(row.startDate) }} → {{ formatDate(row.endDate) }}</p>
         <p class="text-sm text-stone-500">{{ countDays(row.startDate, row.endDate) }} days</p>
       </template>
 
@@ -299,7 +299,7 @@ onBeforeUnmount(() => clearTimeout(noticeTimer));
 
       <template #cell-actions="{ row }">
         <div v-if="row.status === 'Pending'" class="flex justify-end gap-2 max-md:justify-start">
-          <button type="button" class="btn-primary px-4 py-2 text-sm" @click="openAction('approve', row)">
+          <button type="button" class="btn-primary px-3.5 py-1.5" @click="openAction('approve', row)">
             Approve
           </button>
           <button type="button" class="btn-secondary" @click="openAction('reject', row)">Reject</button>

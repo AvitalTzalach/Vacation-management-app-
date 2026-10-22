@@ -109,10 +109,10 @@ function absenceLabel(name: string, absence: TeamPlanningEntry): string {
 </script>
 
 <template>
-  <section class="card p-6 sm:p-8" aria-labelledby="planning-title" :aria-busy="loading">
+  <section class="card p-5 sm:p-6" aria-labelledby="planning-title" :aria-busy="loading">
     <!-- Month header -->
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <h2 id="planning-title" class="text-xl font-semibold text-stone-900">{{ formatMonth(month) }}</h2>
+      <h2 id="planning-title" class="text-lg font-semibold text-stone-900">{{ formatMonth(month) }}</h2>
       <div class="flex gap-2">
         <button v-if="!isCurrentMonth" type="button" class="btn-secondary" @click="goToMonth(currentMonth())">
           Today
@@ -129,7 +129,7 @@ function absenceLabel(name: string, absence: TeamPlanningEntry): string {
     <!-- Error -->
     <div
       v-if="loadError"
-      class="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+      class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
       role="alert"
     >
       <span>{{ loadError }}</span>
@@ -137,12 +137,12 @@ function absenceLabel(name: string, absence: TeamPlanningEntry): string {
     </div>
 
     <!-- First load: skeleton -->
-    <div v-else-if="loading && rows.length === 0" class="mt-6 space-y-3" aria-label="Loading">
-      <div v-for="n in 3" :key="n" class="h-8 animate-pulse rounded-lg bg-sand-100" />
+    <div v-else-if="loading && rows.length === 0" class="mt-4 space-y-3" aria-label="Loading">
+      <div v-for="n in 3" :key="n" class="h-7 animate-pulse rounded-lg bg-sand-100" />
     </div>
 
     <!-- Empty month -->
-    <div v-else-if="rows.length === 0" class="mt-6 rounded-2xl bg-sand-50 px-6 py-12 text-center">
+    <div v-else-if="rows.length === 0" class="mt-4 rounded-2xl bg-sand-50 px-6 py-12 text-center">
       <p class="font-display text-3xl text-stone-800">Everyone is around</p>
       <p class="mt-1 text-sm text-stone-500">No approved vacation in {{ formatMonth(month) }}.</p>
     </div>
@@ -153,7 +153,7 @@ function absenceLabel(name: string, absence: TeamPlanningEntry): string {
     <div
       v-else
       ref="gridRef"
-      class="relative mt-6 overflow-x-auto"
+      class="relative mt-4 overflow-x-auto"
       :class="{ 'opacity-50 transition-opacity': loading }"
     >
       <table class="w-full border-separate border-spacing-[3px]">
@@ -176,12 +176,12 @@ function absenceLabel(name: string, absence: TeamPlanningEntry): string {
         </thead>
         <tbody>
           <tr v-for="row in rows" :key="row.userId">
-            <th scope="row" class="sticky left-0 z-10 bg-white pr-3 text-left font-normal whitespace-nowrap text-stone-800">
+            <th scope="row" class="sticky left-0 z-10 bg-white pr-3 text-left text-sm font-normal whitespace-nowrap text-stone-800">
               {{ row.name }}
             </th>
             <td v-for="(absence, index) in row.cells" :key="days[index].date" class="p-0">
               <div
-                class="h-8 rounded-md"
+                class="h-7 rounded-md"
                 :class="[
                   absence ? 'bg-brand-500' : days[index].weekend ? 'bg-sand-300/60' : 'bg-sand-100',
                   days[index].today ? 'ring-2 ring-brand-300 ring-offset-1' : '',
@@ -197,7 +197,7 @@ function absenceLabel(name: string, absence: TeamPlanningEntry): string {
     </div>
 
     <!-- Legend -->
-    <div class="mt-5 flex flex-wrap items-center gap-5 text-sm text-stone-500">
+    <div class="mt-4 flex flex-wrap items-center gap-5 text-xs text-stone-500">
       <span class="flex items-center gap-2"><span class="size-3 rounded-sm bg-brand-500" /> Approved</span>
       <span class="flex items-center gap-2"><span class="size-3 rounded-sm bg-sand-300/60" /> Weekend</span>
       <span class="flex items-center gap-2"><span class="size-3 rounded-sm ring-2 ring-brand-300" /> Today</span>

@@ -34,7 +34,7 @@ function signOut(): void {
 </script>
 
 <template>
-  <div class="min-h-screen pb-16">
+  <div class="min-h-screen pb-10">
     <header class="relative isolate overflow-hidden">
       <img
         :src="heroImage"
@@ -44,37 +44,37 @@ function signOut(): void {
       <!-- The misty photo is very light: a soft dark gradient keeps the white text readable. -->
       <div class="absolute inset-0 -z-10 bg-gradient-to-r from-slate-900/55 via-slate-900/30 to-slate-900/10" />
 
-      <div class="mx-auto max-w-6xl px-5 pt-6 pb-12 sm:px-8 sm:pb-14">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-          <RouterLink :to="{ name: 'home' }" class="font-display text-3xl text-white">Away</RouterLink>
+      <div class="mx-auto max-w-6xl px-5 pt-4 pb-6 sm:px-8 sm:pb-7">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <RouterLink :to="{ name: 'home' }" class="font-display text-2xl text-white">Away</RouterLink>
 
           <nav class="flex flex-wrap items-center gap-1 text-sm text-white/90" aria-label="Main">
             <RouterLink
               v-for="item in navItems"
               :key="item.label"
               :to="item.to"
-              class="rounded-full px-4 py-2 transition hover:bg-white/15"
+              class="rounded-full px-3 py-1.5 transition hover:bg-white/15"
               active-class="bg-white/25 text-white backdrop-blur-sm"
             >
               {{ item.label }}
             </RouterLink>
-            <button type="button" class="rounded-full px-4 py-2 transition hover:bg-white/15" @click="signOut">
+            <button type="button" class="rounded-full px-3 py-1.5 transition hover:bg-white/15" @click="signOut">
               Sign out
             </button>
           </nav>
         </div>
 
-        <div class="mt-14 sm:mt-20">
-          <p v-if="auth.user" class="text-sm font-medium text-white/85">
+        <div class="mt-5 sm:mt-7">
+          <p v-if="auth.user" class="text-xs font-medium text-white/85 sm:text-sm">
             {{ auth.user.name }} · {{ auth.user.role }}
           </p>
-          <h1 class="font-display mt-1 text-5xl leading-tight text-white sm:text-6xl">{{ route.meta.title }}</h1>
-          <p v-if="route.meta.subtitle" class="mt-1 text-white/90">{{ route.meta.subtitle }}</p>
+          <h1 class="font-display text-3xl leading-tight text-white sm:text-4xl">{{ route.meta.title }}</h1>
+          <p v-if="route.meta.subtitle" class="text-sm text-white/90">{{ route.meta.subtitle }}</p>
         </div>
       </div>
     </header>
 
-    <main class="mx-auto mt-8 max-w-6xl px-5 sm:px-8">
+    <main class="mx-auto mt-6 max-w-6xl px-5 sm:px-8">
       <RouterView />
     </main>
   </div>

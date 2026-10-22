@@ -45,7 +45,7 @@ const isFirstLoad = () => props.loading && props.rows.length === 0;
   <div :aria-busy="loading">
     <!-- Skeleton (first load) -->
     <div v-if="isFirstLoad()" class="divide-y divide-sand-200" aria-label="Loading">
-      <div v-for="n in skeletonRows" :key="n" class="flex items-center gap-6 py-5">
+      <div v-for="n in skeletonRows" :key="n" class="flex items-center gap-6 py-4">
         <div class="h-4 w-1/4 animate-pulse rounded-full bg-sand-200" />
         <div class="h-4 w-1/3 animate-pulse rounded-full bg-sand-100" />
         <div class="ml-auto h-6 w-20 animate-pulse rounded-full bg-sand-100" />
@@ -69,7 +69,7 @@ const isFirstLoad = () => props.loading && props.rows.length === 0;
               v-for="column in columns"
               :key="column.key"
               scope="col"
-              class="px-3 pb-3 text-xs font-medium tracking-[0.12em] text-stone-500 uppercase first:pl-0 last:pr-0"
+              class="px-3 pb-2 text-[0.7rem] font-medium tracking-[0.12em] text-stone-500 uppercase first:pl-0 last:pr-0"
               :class="column.class"
             >
               {{ column.label }}
@@ -81,7 +81,7 @@ const isFirstLoad = () => props.loading && props.rows.length === 0;
             <td
               v-for="column in columns"
               :key="column.key"
-              class="px-3 py-4 first:pl-0 last:pr-0"
+              class="px-3 py-3 first:pl-0 last:pr-0"
               :class="column.class"
             >
               <slot :name="`cell-${column.key}`" :row="row">{{ cellValue(row, column.key) }}</slot>
@@ -92,9 +92,9 @@ const isFirstLoad = () => props.loading && props.rows.length === 0;
 
       <!-- Mobile: one card per row -->
       <ul class="divide-y divide-sand-200 md:hidden" :class="{ 'opacity-50 transition-opacity': loading }">
-        <li v-for="row in rows" :key="rowKey(row)" class="space-y-3 py-4">
+        <li v-for="row in rows" :key="rowKey(row)" class="space-y-2 py-3">
           <div v-for="column in columns" :key="column.key">
-            <p v-if="!column.hideLabelOnMobile" class="text-xs font-medium tracking-[0.12em] text-stone-500 uppercase">
+            <p v-if="!column.hideLabelOnMobile" class="text-[0.7rem] font-medium tracking-[0.12em] text-stone-500 uppercase">
               {{ column.label }}
             </p>
             <slot :name="`cell-${column.key}`" :row="row">{{ cellValue(row, column.key) }}</slot>
