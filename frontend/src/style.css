@@ -1,0 +1,78 @@
+/*
+ * Global styles: Tailwind CSS v4 + the "Away" design tokens.
+ *
+ * Palette (from the design screenshots): warm sand background, white cards, and a turquoise
+ * brand color. Light turquoise shades (50–300) are used for surfaces, focus rings and active
+ * states; the darker shade 600 is used where white text sits on top, so text keeps a contrast
+ * ratio above 4.5:1 (WCAG AA).
+ */
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
+
+  --color-sand-50: #fbf9f6;
+  --color-sand-100: #f5f1eb;
+  --color-sand-200: #ebe4d9;
+  --color-sand-300: #dcd1c1;
+
+  --color-brand-50: #effbfc;
+  --color-brand-100: #d6f4f6;
+  --color-brand-200: #b1e8ed;
+  --color-brand-300: #7bd6df;
+  --color-brand-400: #3ebccb;
+  --color-brand-500: #1fa0b0;
+  --color-brand-600: #13808d;
+  --color-brand-700: #136a76;
+  --color-brand-800: #165662;
+  --color-brand-900: #174853;
+}
+
+@layer base {
+  body {
+    @apply bg-sand-50 font-sans text-stone-800 antialiased;
+  }
+}
+
+/* Reusable building blocks shared by several components. */
+@layer components {
+  /* White rounded card with a soft shadow. */
+  .card {
+    @apply rounded-3xl border border-sand-200/70 bg-white shadow-[0_18px_50px_-24px_rgba(28,25,23,0.25)];
+  }
+
+  /* Small uppercase form label. */
+  .field-label {
+    @apply mb-2 block text-xs font-medium tracking-[0.12em] text-stone-500 uppercase;
+  }
+
+  /* Text, email, date and textarea inputs. */
+  .field-input {
+    @apply w-full rounded-2xl border border-sand-300 bg-white px-4 py-3 text-stone-800 transition
+      placeholder:text-stone-400 focus:border-brand-400 focus:ring-4 focus:ring-brand-100 focus:outline-none
+      disabled:cursor-not-allowed disabled:bg-sand-100;
+  }
+
+  .field-input-error {
+    @apply border-rose-300 focus:border-rose-400 focus:ring-rose-100;
+  }
+
+  .field-error {
+    @apply mt-1.5 text-sm text-rose-600;
+  }
+
+  /* Main call-to-action button (turquoise). */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-brand-600 px-5 py-3 font-semibold
+      text-white shadow-sm transition hover:bg-brand-700 focus-visible:ring-4 focus-visible:ring-brand-200
+      focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  /* Secondary button: white with a thin border. */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-sand-300 bg-white px-4 py-2
+      text-sm font-medium text-stone-700 shadow-sm transition hover:bg-sand-50 focus-visible:ring-4
+      focus-visible:ring-brand-100 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50;
+  }
+}
