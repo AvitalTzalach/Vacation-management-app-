@@ -1,0 +1,10 @@
+openapi: 3.0.3
+info:
+  title: Vacation Management API
+  version: 1.0.0
+  description: >
+    REST API of the Vacation Management System. Routes are dispatched by commoneventframework:
+    each operation points to its handler (`x-handler`) and input parser (`x-inputParser`)
+    in src/handlers. Interactive documentation is served at GET /doc.
+# Routes are added step by step (step 2: auth + requester routes).
+paths: {}

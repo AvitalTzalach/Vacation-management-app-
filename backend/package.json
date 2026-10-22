@@ -1,0 +1,34 @@
+{
+  "name": "vacation-management-backend",
+  "version": "1.0.0",
+  "description": "Vacation Management System API (commoneventframework + TypeORM + PostgreSQL)",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "dev": "npx ts-node src/index.ts --local",
+    "codegen": "cef-gen-handlers",
+    "build": "cef-build",
+    "build:full": "cef-build --full",
+    "db:migrate": "ts-node src/database/migrate.ts",
+    "db:revert": "ts-node src/database/migrate.ts --revert",
+    "db:seed": "ts-node src/database/seed.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "commoneventframework": "1.0.19",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.12.0",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.20",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.23.1",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  }
+}

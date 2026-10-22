@@ -1,0 +1,26 @@
+# Local infrastructure for the Vacation Management System.
+# Only the database runs in Docker; backend and frontend run with npm (see README).
+services:
+  # PostgreSQL database used by the backend through TypeORM.
+  postgres:
+    image: postgres:16-alpine
+    container_name: vacation-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vacation
+      POSTGRES_PASSWORD: vacation
+      POSTGRES_DB: vacation_management
+    ports:
+      - "5432:5432"
+    # Named volume so data survives container restarts.
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    # Lets `docker compose up --wait` return only once the database accepts connections.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vacation -d vacation_management"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:
