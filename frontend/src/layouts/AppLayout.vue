@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute, useRouter, type RouteLocationRaw } from "vue-router";
-import heroImage from "@/assets/images/login-beach.jpg";
+import heroImage from "@/assets/images/hero-mountains.jpg";
 import { useAuthStore } from "@/stores/auth";
 
 const auth = useAuthStore();
@@ -19,11 +19,13 @@ interface NavItem {
 }
 
 // Navigation depends on the role: requesters see their requests, validators the dashboard.
-const navItems = computed<NavItem[]>(() =>
+// Team planning is shared by both roles.
+const navItems = computed<NavItem[]>(() => [
   auth.user?.role === "Validator"
-    ? [{ label: "Dashboard", to: { name: "dashboard" } }]
-    : [{ label: "My requests", to: { name: "my-requests" } }]
-);
+    ? { label: "Dashboard", to: { name: "dashboard" } }
+    : { label: "My requests", to: { name: "my-requests" } },
+  { label: "Team planning", to: { name: "team-planning" } },
+]);
 
 function signOut(): void {
   auth.logout();
@@ -37,10 +39,10 @@ function signOut(): void {
       <img
         :src="heroImage"
         alt=""
-        class="absolute inset-0 -z-20 size-full object-cover object-[center_45%]"
+        class="absolute inset-0 -z-20 size-full object-cover object-[center_40%]"
       />
-      <!-- Darkens the photo so white text stays readable. -->
-      <div class="absolute inset-0 -z-10 bg-gradient-to-b from-stone-900/45 via-stone-900/20 to-stone-900/50" />
+      <!-- The misty photo is very light: a soft dark gradient keeps the white text readable. -->
+      <div class="absolute inset-0 -z-10 bg-gradient-to-r from-slate-900/55 via-slate-900/30 to-slate-900/10" />
 
       <div class="mx-auto max-w-6xl px-5 pt-6 pb-12 sm:px-8 sm:pb-14">
         <div class="flex flex-wrap items-center justify-between gap-4">

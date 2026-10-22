@@ -3,6 +3,7 @@
 import { registerHandlerRefs } from "commoneventframework";
 
 import * as __cef_handlers_auth from "../handlers/auth";
+import * as __cef_handlers_teamPlanning from "../handlers/teamPlanning";
 import * as __cef_handlers_users from "../handlers/users";
 import * as __cef_handlers_vacationRequests from "../handlers/vacationRequests";
 
@@ -11,6 +12,8 @@ export class HandlerRegistry {
 		registerHandlerRefs({
 			"handlers/auth#login": __cef_handlers_auth.login,
 			"handlers/auth#parseLoginInput": __cef_handlers_auth.parseLoginInput,
+			"handlers/teamPlanning#parseTeamPlanningInput": __cef_handlers_teamPlanning.parseTeamPlanningInput,
+			"handlers/teamPlanning#teamPlanning": __cef_handlers_teamPlanning.teamPlanning,
 			"handlers/users#listUsers": __cef_handlers_users.listUsers,
 			"handlers/users#parseListUsersInput": __cef_handlers_users.parseListUsersInput,
 			"handlers/vacationRequests#approveVacationRequest": __cef_handlers_vacationRequests.approveVacationRequest,

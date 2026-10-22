@@ -35,6 +35,59 @@ export async function listMyVacationRequests(
   return toPaginatedResult(rows.map(toVacationRequestDto), total, pagination);
 }
 
+// One approved absence in the team planning. Deliberately minimal: no reason, no comment.
+export interface TeamPlanningEntryDto {
+  userId: number;
+  userName: string;
+  startDate: string;
+  endDate: string;
+}
+
+export interface TeamPlanningDto {
+  // The range actually used (the current month when none was given).
+  from: string;
+  to: string;
+  data: TeamPlanningEntryDto[];
+}
+
+/**
+ * Team planning (both roles): Approved requests that overlap [from, to], sorted by employee
+ * name then start date. Only the owner and the dates are selected — never `reason` or `comments`,
+ * which are private to the requester and the validators.
+ * Overlap uses the same inclusive rule as rule 2: start_date <= to AND end_date >= from.
+ */
+export async function getTeamPlanning(
+  dataSource: DataSource,
+  range: { from: string; to: string }
+): Promise<TeamPlanningDto> {
+  const rows = await dataSource
+    .getRepository(VacationRequest)
+    .createQueryBuilder("request")
+    .innerJoin("request.user", "user")
+    .select([
+      "request.user_id AS user_id",
+      "user.name AS user_name",
+      "request.start_date AS start_date",
+      "request.end_date AS end_date",
+    ])
+    .where("request.status = :approved", { approved: VacationRequestStatus.Approved })
+    .andWhere("request.start_date <= :to", { to: range.to })
+    .andWhere("request.end_date >= :from", { from: range.from })
+    .orderBy("user.name", "ASC")
+    .addOrderBy("request.start_date", "ASC")
+    .getRawMany<{ user_id: number; user_name: string; start_date: string; end_date: string }>();
+
+  return {
+    ...range,
+    data: rows.map((row) => ({
+      userId: row.user_id,
+      userName: row.user_name,
+      startDate: row.start_date,
+      endDate: row.end_date,
+    })),
+  };
+}
+
 export interface VacationRequestFilters {
   status?: VacationRequestStatus;
   userId?: number;

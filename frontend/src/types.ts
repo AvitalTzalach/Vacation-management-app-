@@ -44,6 +44,20 @@ export interface VacationRequestWithUser extends VacationRequest {
   user: UserSummary;
 }
 
+// One approved absence in the team planning (no reason or comment, by design).
+export interface TeamPlanningEntry {
+  userId: number;
+  userName: string;
+  startDate: string;
+  endDate: string;
+}
+
+export interface TeamPlanning {
+  from: string;
+  to: string;
+  data: TeamPlanningEntry[];
+}
+
 export interface CreateVacationRequestPayload {
   startDate: string;
   endDate: string;

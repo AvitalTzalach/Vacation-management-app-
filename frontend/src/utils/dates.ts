@@ -32,6 +32,48 @@ export function addDays(isoDate: string, days: number): string {
   return toIsoDate(date);
 }
 
+// --- Months, written "YYYY-MM" ---
+
+// Current month, "YYYY-MM".
+export function currentMonth(): string {
+  return todayIso().slice(0, 7);
+}
+
+// True for a valid "YYYY-MM" value.
+export function isValidMonth(value: unknown): value is string {
+  return typeof value === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
+}
+
+// "2026-10" plus 1 → "2026-11"; minus 1 → "2026-09" (handles year changes).
+export function addMonths(month: string, count: number): string {
+  const [year, monthIndex] = month.split("-").map(Number);
+  const date = new Date(year, monthIndex - 1 + count, 1, 12);
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}`;
+}
+
+// Number of days in a month ("2026-02" → 28).
+export function daysInMonth(month: string): number {
+  const [year, monthIndex] = month.split("-").map(Number);
+  // Day 0 of the next month is the last day of this month.
+  return new Date(year, monthIndex, 0, 12).getDate();
+}
+
+// First and last day of a month, "YYYY-MM-DD".
+export function monthBounds(month: string): { from: string; to: string } {
+  return { from: `${month}-01`, to: `${month}-${pad2(daysInMonth(month))}` };
+}
+
+// "2026-10" → "October 2026".
+export function formatMonth(month: string): string {
+  return new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeric" }).format(parseIsoDate(`${month}-01`));
+}
+
+// True for Saturday and Sunday.
+export function isWeekend(isoDate: string): boolean {
+  const day = parseIsoDate(isoDate).getDay();
+  return day === 0 || day === 6;
+}
+
 const displayFormat = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
   month: "short",

@@ -32,6 +32,23 @@ export function todayIso(): string {
   return toIsoDate(new Date());
 }
 
+// First and last day of the month containing the given "YYYY-MM-DD" date.
+export function monthRange(isoDate: string): { from: string; to: string } {
+  const [year, month] = isoDate.split("-").map(Number);
+  // Day 0 of the next month is the last day of this month.
+  const lastDay = new Date(year, month, 0, 12).getDate();
+  return { from: `${year}-${pad2(month)}-01`, to: `${year}-${pad2(month)}-${pad2(lastDay)}` };
+}
+
+// Number of days from `from` to `to`, both included ("2026-10-01".."2026-10-31" → 31).
+export function daysBetweenInclusive(from: string, to: string): number {
+  const toNoon = (iso: string) => {
+    const [y, m, d] = iso.split("-").map(Number);
+    return new Date(y, m - 1, d, 12).getTime();
+  };
+  return Math.round((toNoon(to) - toNoon(from)) / (24 * 60 * 60 * 1000)) + 1;
+}
+
 /**
  * Adds a number of days (can be negative) to a "YYYY-MM-DD" date.
  * Works at noon local time so a daylight-saving change can never move the result to another day.

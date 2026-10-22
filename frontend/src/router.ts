@@ -71,6 +71,16 @@ const router = createRouter({
             subtitle: "Approve or reject your team's time off.",
           },
         },
+        {
+          path: "team-planning",
+          name: "team-planning",
+          component: () => import("@/views/TeamPlanningView.vue"),
+          meta: {
+            roles: ["Requester", "Validator"],
+            title: "Team planning",
+            subtitle: "Who's away, and when.",
+          },
+        },
       ],
     },
     // Unknown URLs go back to the home page.

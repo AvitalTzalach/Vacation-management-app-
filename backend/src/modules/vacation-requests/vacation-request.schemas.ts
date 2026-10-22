@@ -6,7 +6,7 @@
  * the entry point is.
  */
 import { z } from "zod";
-import { isValidIsoDate } from "../../shared/dates";
+import { daysBetweenInclusive, isValidIsoDate, monthRange, todayIso } from "../../shared/dates";
 import { paginationQuerySchema } from "../../shared/pagination";
 import { VacationRequestStatus } from "./vacation-request.entity";
 
@@ -96,3 +96,38 @@ export const rejectVacationRequestSchema = z
   .strict();
 
 export type RejectVacationRequestInput = z.infer<typeof rejectVacationRequestSchema>;
+
+// Longest range the team planning accepts (a little more than a year).
+export const TEAM_PLANNING_MAX_DAYS = 366;
+
+/**
+ * Query string of GET /team-planning: an optional date range.
+ * - none given → the current month (server date);
+ * - both given → used as is, `from` must not be after `to`, at most 366 days;
+ * - only one given → 400 (ambiguous).
+ */
+export const teamPlanningQuerySchema = z
+  .object({
+    from: z.preprocess(emptyToUndefined, isoDate("from").optional()),
+    to: z.preprocess(emptyToUndefined, isoDate("to").optional()),
+  })
+  .superRefine((value, ctx) => {
+    if (Boolean(value.from) !== Boolean(value.to)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["from"], message: "from and to must be given together" });
+      return;
+    }
+    if (value.from && value.to) {
+      if (value.from > value.to) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["to"], message: "to must be on or after from" });
+      } else if (daysBetweenInclusive(value.from, value.to) > TEAM_PLANNING_MAX_DAYS) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["to"],
+          message: `The range cannot exceed ${TEAM_PLANNING_MAX_DAYS} days`,
+        });
+      }
+    }
+  })
+  .transform((value) => (value.from && value.to ? { from: value.from, to: value.to } : monthRange(todayIso())));
+
+export type TeamPlanningQuery = z.infer<typeof teamPlanningQuerySchema>;
