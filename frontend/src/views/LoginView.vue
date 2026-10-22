@@ -2,7 +2,7 @@
   LoginView: split screen — beach photo with the tagline on the left, sign-in form on the right.
   On small screens the photo becomes a short banner above the form.
 
-  - "Demo accounts" buttons fill the form with a seeded account and sign in at once.
+  - Demo accounts are listed in the README (they are not shown on the screen).
   - A wrong password shows the API message ("Invalid email or password.") on the form:
     the Axios 401 interceptor deliberately ignores the login request.
   - After login, the user goes back to the page they asked for (?redirect=...), or to their home page.
@@ -15,13 +15,6 @@ import Spinner from "@/components/Spinner.vue";
 import { homeRouteFor } from "@/router";
 import { useAuthStore } from "@/stores/auth";
 import { getErrorMessage } from "@/utils/api-errors";
-
-// Seeded accounts (see the README); they all share the same password.
-const DEMO_PASSWORD = "password";
-const DEMO_ACCOUNTS = [
-  { label: "Requester", email: "maya.levi@example.com" },
-  { label: "Validator", email: "sarah.manager@example.com" },
-];
 
 const auth = useAuthStore();
 const route = useRoute();
@@ -58,13 +51,6 @@ async function submit(): Promise<void> {
   } finally {
     submitting.value = false;
   }
-}
-
-// Fills the form with a demo account and signs in.
-function signInAs(accountEmail: string): void {
-  email.value = accountEmail;
-  password.value = DEMO_PASSWORD;
-  submit();
 }
 </script>
 
@@ -135,25 +121,6 @@ function signInAs(accountEmail: string): void {
             {{ submitting ? "Signing in…" : "Sign in" }}
           </button>
         </form>
-
-        <div class="mt-5 rounded-2xl bg-sand-100 p-4">
-          <p class="text-sm text-stone-600">
-            Demo accounts (password: <span class="font-semibold text-stone-800">{{ DEMO_PASSWORD }}</span>)
-          </p>
-          <div class="mt-3 grid grid-cols-2 gap-3">
-            <button
-              v-for="account in DEMO_ACCOUNTS"
-              :key="account.email"
-              type="button"
-              class="btn-secondary"
-              :disabled="submitting"
-              :title="account.email"
-              @click="signInAs(account.email)"
-            >
-              {{ account.label }}
-            </button>
-          </div>
-        </div>
       </div>
     </main>
   </div>

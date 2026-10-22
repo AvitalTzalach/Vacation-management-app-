@@ -21,7 +21,7 @@ Both roles share a **team planning** calendar of approved absences.
 ## Table of contents
 
 1. [Quick start](#quick-start)
-2. [Demo accounts](#demo-accounts)
+2. [How to sign in](#how-to-sign-in)
 3. [Installation and run, step by step](#installation-and-run-step-by-step)
 4. [Requirements coverage](#requirements-coverage)
 5. [Architecture](#architecture)
@@ -59,24 +59,23 @@ npm ci
 npm run dev                   # App on http://localhost:5173
 ```
 
-Open **http://localhost:5173** and click **Requester** or **Validator** on the login page.
+Open **http://localhost:5173** and sign in with one of the accounts below.
 
-## Demo accounts
+## How to sign in
 
-All accounts use the password **`password`**.
+**Every account uses the same password: `password`**
 
-| Role | Email | Notes |
-|------|-------|-------|
-| Validator | `sarah.manager@example.com` | Reviews every request |
-| Requester | `maya.levi@example.com` | Has Pending, Approved and Rejected requests |
-| Requester | `daniel.cohen@example.com` | |
-| Requester | `noa.katz@example.com` | |
-| Requester | `lucas.martin@example.com` | |
-| Requester | `emma.dubois@example.com` | |
+| Sign in as | Email | What you can do |
+|------------|-------|-----------------|
+| **Manager** (Validator) | `sarah.manager@example.com` | See all requests, filter them, approve or reject, team planning |
+| **Employee** (Requester) | `maya.levi@example.com` | Submit requests, follow their status, team planning |
 
-The seed creates **25 requests** in mixed statuses (10 Pending, 10 Approved, 5 Rejected), with dates
-relative to today, so the dashboard pagination, the filters and the team planning always have data.
-It is **idempotent**: run `npm run db:seed` again at any time to reset the demo data.
+More employees, same password: `daniel.cohen@example.com`, `noa.katz@example.com`,
+`lucas.martin@example.com`, `emma.dubois@example.com`.
+
+These accounts are created by `npm run db:seed`, together with **25 requests** in mixed statuses
+(10 Pending, 10 Approved, 5 Rejected) whose dates are relative to today, so the dashboard, the filters
+and the team planning always have data. Run `npm run db:seed` again at any time to reset the demo data.
 
 ---
 
@@ -443,7 +442,7 @@ users ... LIMIT`, one `COUNT`), whatever the page size: no N+1.
 
 | Route | Role | Page |
 |-------|------|------|
-| `/login` | guests | Split screen: beach photo + sign-in form, one-click demo accounts |
+| `/login` | guests | Split screen: beach photo + sign-in form |
 | `/my-requests` | Requester | New request form + paginated list with status badges and rejection comments |
 | `/dashboard` | Validator | Filters (status, employee), table, pagination, approve / reject dialog |
 | `/team-planning` | both | Month grid of approved absences, previous / next month |
