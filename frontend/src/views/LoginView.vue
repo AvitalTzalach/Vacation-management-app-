@@ -8,7 +8,7 @@
   - After login, the user goes back to the page they asked for (?redirect=...), or to their home page.
 -->
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import beachImage from "@/assets/images/login-beach.jpg";
 import Spinner from "@/components/Spinner.vue";
@@ -22,6 +22,13 @@ const router = useRouter();
 
 const email = ref("");
 const password = ref("");
+// Toggled by the eye button: shows the password in clear text while true. Hidden by default.
+const showPassword = ref(false);
+
+// When the field is emptied, the eye disappears and the next password starts hidden again.
+watch(password, (value) => {
+  if (!value) showPassword.value = false;
+});
 const submitting = ref(false);
 const errorMessage = ref<string | null>(null);
 
@@ -107,14 +114,41 @@ async function submit(): Promise<void> {
           </div>
           <div>
             <label for="password" class="field-label">Password</label>
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              autocomplete="current-password"
-              class="field-input"
-              :disabled="submitting"
-            />
+            <div class="relative">
+              <input
+                id="password"
+                v-model="password"
+                :type="showPassword ? 'text' : 'password'"
+                autocomplete="current-password"
+                class="field-input pr-11"
+                :disabled="submitting"
+              />
+              <!-- Eye button: shows / hides the password. Visible only when the field has text.
+                   The icon reflects the current state: closed eye = hidden (dots), open eye = visible.
+                   Screen readers get the state from aria-pressed. -->
+              <button
+                v-if="password"
+                type="button"
+                class="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-xl text-stone-400 transition hover:text-stone-600 focus-visible:text-brand-600 focus-visible:outline-none"
+                :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                :aria-pressed="showPassword"
+                :title="showPassword ? 'Hide password' : 'Show password'"
+                @click="showPassword = !showPassword"
+              >
+                <!-- Open eye: the password is visible -->
+                <svg v-if="showPassword" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                <!-- Closed (crossed-out) eye: the password is hidden — the default -->
+                <svg v-else class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M10.7 5.1A10.4 10.4 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-2.6 3.5" />
+                  <path d="M6.6 6.6C3.7 8.5 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6" />
+                  <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+                  <path d="m2 2 20 20" />
+                </svg>
+              </button>
+            </div>
           </div>
           <button type="submit" class="btn-primary w-full" :disabled="submitting">
             <Spinner v-if="submitting" class="size-4" />

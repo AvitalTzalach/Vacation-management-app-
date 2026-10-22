@@ -144,7 +144,11 @@ async function main(): Promise<void> {
   // Load .env before anything reads the configuration.
   await loadEnv();
   const dataSource = await getDataSource();
-  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, BCRYPT_ROUNDS);
+  // One hash PER USER: bcrypt generates a new random salt on every call, so even identical passwords
+  // get different hashes. Reusing a single hash would reveal that the accounts share a password.
+  const usersWithHashes = await Promise.all(
+    DEMO_USERS.map(async (user) => ({ ...user, password: await bcrypt.hash(DEMO_PASSWORD, BCRYPT_ROUNDS) }))
+  );
   const today = todayIso();
 
   // One transaction: the seed is applied completely or not at all.
@@ -153,10 +157,7 @@ async function main(): Promise<void> {
     const requestRepository = manager.getRepository(VacationRequest);
 
     // Insert the demo users, or update them if their email already exists.
-    await userRepository.upsert(
-      DEMO_USERS.map((user) => ({ ...user, password: passwordHash })),
-      ["email"]
-    );
+    await userRepository.upsert(usersWithHashes, ["email"]);
 
     const users = await userRepository.findBy({ email: In(DEMO_USERS.map((u) => u.email)) });
     const userIdByEmail = new Map(users.map((user) => [user.email, user.id]));

@@ -524,7 +524,7 @@ tests/
 | **Team planning: Approved only, no reason / comment** | The planning is visible to every employee: unapproved requests and private texts are not shared. |
 | **Login: same message and similar timing for unknown e-mail and wrong password** | Prevents account enumeration (a bcrypt comparison runs against a dummy hash when the e-mail is unknown). |
 | **JWT: HS256 only, 8 h, secret mandatory** | `algorithms: ["HS256"]` prevents algorithm-confusion attacks; no default secret in code. |
-| **bcryptjs** | Pure JavaScript: no native build on Windows. |
+| **Passwords: bcrypt hashes, never returned** | Only a bcrypt hash (cost 10, random salt per user) is stored. The `password` column is `select: false`: it is loaded only by the login command, and no API response or JWT ever contains it. `bcryptjs` is pure JavaScript (no native build on Windows). |
 | **Lazy, single DataSource initialization** | `.env` is loaded asynchronously by CEF; connecting on first use avoids reading configuration too early and shares one pool. |
 | **Exact dependency versions, audited** | Versions are pinned and were chosen at least two weeks after release. The audit led to upgrading TypeORM to 0.3.31 (SQL-injection advisory up to 0.3.30) and moving the frontend to Tailwind CSS 4 and Vite 6.4. |
 
