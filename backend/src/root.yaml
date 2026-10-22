@@ -5,6 +5,222 @@ info:
   description: >
     REST API of the Vacation Management System. Routes are dispatched by commoneventframework:
     each operation points to its handler (`x-handler`) and input parser (`x-inputParser`)
-    in src/handlers. Interactive documentation is served at GET /doc.
-# Routes are added step by step (step 2: auth + requester routes).
-paths: {}
+    in src/handlers. Protected routes need an `Authorization: Bearer <token>` header
+    (token returned by POST /auth/login, valid 8 hours).
+
+tags:
+  - name: Auth
+  - name: Vacation requests
+
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Sign in and receive a JWT
+      x-handler: handlers/auth#login
+      x-inputParser: handlers/auth#parseLoginInput
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Signed in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          description: Invalid email or password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /vacation-requests:
+    post:
+      tags: [Vacation requests]
+      summary: Submit a vacation request (Requester)
+      description: >
+        Creates a Pending request for the signed-in user (the owner always comes from the token).
+        Rules: end date after start date, start date not in the past, no overlap with the user's
+        Pending or Approved requests (inclusive dates).
+      security:
+        - bearerAuth: []
+      x-handler: handlers/vacationRequests#createVacationRequest
+      x-inputParser: handlers/vacationRequests#parseCreateVacationRequestInput
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVacationRequest'
+      responses:
+        '201':
+          description: Request created (status Pending)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacationRequest'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: The dates overlap one of the user's Pending or Approved requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /vacation-requests/mine:
+    get:
+      tags: [Vacation requests]
+      summary: List my vacation requests (Requester)
+      description: Newest first (created_at DESC, id DESC).
+      security:
+        - bearerAuth: []
+      x-handler: handlers/vacationRequests#listMyRequests
+      x-inputParser: handlers/vacationRequests#parseListMyVacationRequestsInput
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: One page of the user's requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVacationRequests'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    Page:
+      in: query
+      name: page
+      schema: { type: integer, minimum: 1, default: 1 }
+    Limit:
+      in: query
+      name: limit
+      schema: { type: integer, minimum: 1, maximum: 50, default: 10 }
+
+  responses:
+    ValidationError:
+      description: Invalid input or broken business rule
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Missing, invalid or expired token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: The user's role is not allowed to call this route
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Role:
+      type: string
+      enum: [Requester, Validator]
+
+    Status:
+      type: string
+      enum: [Pending, Approved, Rejected]
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      additionalProperties: false
+      properties:
+        email: { type: string, format: email, example: maya.levi@example.com }
+        password: { type: string, example: password }
+
+    LoginResponse:
+      type: object
+      properties:
+        token: { type: string, description: JWT valid for 8 hours }
+        user:
+          type: object
+          properties:
+            id: { type: integer }
+            name: { type: string }
+            email: { type: string }
+            role: { $ref: '#/components/schemas/Role' }
+
+    CreateVacationRequest:
+      type: object
+      required: [startDate, endDate]
+      additionalProperties: false
+      properties:
+        startDate: { type: string, format: date, example: '2026-12-21' }
+        endDate: { type: string, format: date, example: '2026-12-23' }
+        reason: { type: string, nullable: true, maxLength: 500, example: Family trip }
+
+    VacationRequest:
+      type: object
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+        reason: { type: string, nullable: true }
+        status: { $ref: '#/components/schemas/Status' }
+        comment:
+          type: string
+          nullable: true
+          description: Validator's comment (stored in the `comments` column). Always set when Rejected.
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    PaginationMeta:
+      type: object
+      properties:
+        page: { type: integer }
+        limit: { type: integer }
+        total: { type: integer }
+        totalPages: { type: integer }
+
+    PaginatedVacationRequests:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/VacationRequest' }
+        meta: { $ref: '#/components/schemas/PaginationMeta' }
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              enum: [VALIDATION_ERROR, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT, INTERNAL_ERROR]
+            message: { type: string }
+            details:
+              description: Optional. For validation errors, a list of { field, message }.
