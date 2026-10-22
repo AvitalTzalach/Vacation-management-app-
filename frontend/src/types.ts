@@ -33,6 +33,17 @@ export interface VacationRequest {
   updatedAt: string;
 }
 
+// Public data of a user (dashboard filter, request owner).
+export interface UserSummary {
+  id: number;
+  name: string;
+}
+
+// Request with its owner, as returned to validators by GET /vacation-requests.
+export interface VacationRequestWithUser extends VacationRequest {
+  user: UserSummary;
+}
+
 export interface CreateVacationRequestPayload {
   startDate: string;
   endDate: string;
