@@ -7,6 +7,8 @@
  */
 import { z } from "zod";
 import { isValidIsoDate } from "../../shared/dates";
+import { paginationQuerySchema } from "../../shared/pagination";
+import { VacationRequestStatus } from "./vacation-request.entity";
 
 // Maximum length of the optional reason.
 export const REASON_MAX_LENGTH = 500;
@@ -38,3 +40,59 @@ export const createVacationRequestSchema = z
   .strict();
 
 export type CreateVacationRequestInput = z.infer<typeof createVacationRequestSchema>;
+
+// Maximum length of a validator's comment.
+export const COMMENT_MAX_LENGTH = 1000;
+
+// An empty query value ("?status=") means "no filter", like an absent one.
+function emptyToUndefined(value: unknown): unknown {
+  return value === "" ? undefined : value;
+}
+
+/**
+ * Query string of GET /vacation-requests (validator dashboard):
+ * optional `status` and `userId` filters, plus page / limit.
+ */
+export const listVacationRequestsQuerySchema = paginationQuerySchema.extend({
+  status: z.preprocess(
+    emptyToUndefined,
+    z
+      .nativeEnum(VacationRequestStatus, {
+        errorMap: () => ({ message: "status must be Pending, Approved or Rejected" }),
+      })
+      .optional()
+  ),
+  userId: z.preprocess(
+    emptyToUndefined,
+    z.coerce.number().int().positive("userId must be a positive integer").optional()
+  ),
+});
+
+export type ListVacationRequestsQuery = z.infer<typeof listVacationRequestsQuerySchema>;
+
+// Path parameter `:id` of /vacation-requests/:id/approve and /reject.
+export const requestIdParamsSchema = z.object({
+  id: z.coerce
+    .number({ invalid_type_error: "id must be a number" })
+    .int("id must be an integer")
+    .positive("id must be a positive integer"),
+});
+
+/**
+ * Body of PUT /vacation-requests/:id/reject. Rule 5: the comment is mandatory and cannot be
+ * blank. The API field is `comment`; it is stored in the `comments` column.
+ */
+export const rejectVacationRequestSchema = z
+  .object({
+    comment: z
+      .string({
+        required_error: "A comment is required to reject a request.",
+        invalid_type_error: "Comment must be a string",
+      })
+      .trim()
+      .min(1, "A comment is required to reject a request.")
+      .max(COMMENT_MAX_LENGTH, `Comment must be ${COMMENT_MAX_LENGTH} characters or less`),
+  })
+  .strict();
+
+export type RejectVacationRequestInput = z.infer<typeof rejectVacationRequestSchema>;

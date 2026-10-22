@@ -11,6 +11,7 @@ info:
 tags:
   - name: Auth
   - name: Vacation requests
+  - name: Users
 
 paths:
   /auth/login:
@@ -78,6 +79,127 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    get:
+      tags: [Vacation requests]
+      summary: List all vacation requests (Validator)
+      description: >
+        Newest first (created_at DESC, id DESC). Optional filters by status and by user.
+        Each item includes its owner (id and name).
+      security:
+        - bearerAuth: []
+      x-handler: handlers/vacationRequests#listAllRequests
+      x-inputParser: handlers/vacationRequests#parseListAllVacationRequestsInput
+      parameters:
+        - in: query
+          name: status
+          schema: { $ref: '#/components/schemas/Status' }
+        - in: query
+          name: userId
+          schema: { type: integer, minimum: 1 }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: One page of requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVacationRequestsWithUser'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /vacation-requests/:id/approve:
+    put:
+      tags: [Vacation requests]
+      summary: Approve a Pending request (Validator)
+      description: >
+        Only a Pending request can be approved (an approved or rejected request cannot be modified).
+        PUT is used instead of PATCH because commoneventframework does not allow PATCH.
+      security:
+        - bearerAuth: []
+      x-handler: handlers/vacationRequests#approveVacationRequest
+      x-inputParser: handlers/vacationRequests#parseApproveVacationRequestInput
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Request approved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacationRequest'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/NotPending'
+
+  /vacation-requests/:id/reject:
+    put:
+      tags: [Vacation requests]
+      summary: Reject a Pending request with a comment (Validator)
+      description: >
+        Only a Pending request can be rejected. The comment is mandatory (API field `comment`,
+        stored in the `comments` column). PUT is used instead of PATCH (not allowed by commoneventframework).
+      security:
+        - bearerAuth: []
+      x-handler: handlers/vacationRequests#rejectVacationRequest
+      x-inputParser: handlers/vacationRequests#parseRejectVacationRequestInput
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RejectVacationRequest'
+      responses:
+        '200':
+          description: Request rejected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacationRequest'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/NotPending'
+
+  /users:
+    get:
+      tags: [Users]
+      summary: List requesters for the dashboard filter (Validator)
+      description: Users with the Requester role, sorted by name. Only id and name are returned.
+      security:
+        - bearerAuth: []
+      x-handler: handlers/users#listUsers
+      x-inputParser: handlers/users#parseListUsersInput
+      responses:
+        '200':
+          description: Requesters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
 
   /vacation-requests/mine:
     get:
@@ -121,6 +243,11 @@ components:
       in: query
       name: limit
       schema: { type: integer, minimum: 1, maximum: 50, default: 10 }
+    RequestId:
+      in: path
+      name: id
+      required: true
+      schema: { type: integer, minimum: 1 }
 
   responses:
     ValidationError:
@@ -137,6 +264,18 @@ components:
             $ref: '#/components/schemas/Error'
     Forbidden:
       description: The user's role is not allowed to call this route
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: The vacation request does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotPending:
+      description: The request is no longer Pending (already approved or rejected)
       content:
         application/json:
           schema:
@@ -195,6 +334,45 @@ components:
           description: Validator's comment (stored in the `comments` column). Always set when Rejected.
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
+
+    VacationRequestWithUser:
+      allOf:
+        - $ref: '#/components/schemas/VacationRequest'
+        - type: object
+          properties:
+            user: { $ref: '#/components/schemas/UserSummary' }
+
+    RejectVacationRequest:
+      type: object
+      required: [comment]
+      additionalProperties: false
+      properties:
+        comment:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          example: Release week, please pick other dates.
+
+    UserSummary:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+
+    UsersResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/UserSummary' }
+
+    PaginatedVacationRequestsWithUser:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/VacationRequestWithUser' }
+        meta: { $ref: '#/components/schemas/PaginationMeta' }
 
     PaginationMeta:
       type: object

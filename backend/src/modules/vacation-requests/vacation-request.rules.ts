@@ -1,5 +1,5 @@
 /**
- * Business rules on vacation request dates, as pure functions.
+ * Business rules on vacation requests, as pure functions (dates: rules 1, 2, 4; rejection: rule 5).
  *
  * Pure = no database, no clock, no HTTP: every input is a parameter ("today" too), so each rule
  * can be unit-tested with plain values. Dates are "YYYY-MM-DD" strings, which compare correctly
@@ -31,6 +31,19 @@ export function isStartDateInPast(startDate: string, today: string): boolean {
  */
 export function rangesOverlap(a: DateRange, b: DateRange): boolean {
   return a.startDate <= b.endDate && a.endDate >= b.startDate;
+}
+
+// Rule 5: a rejection must come with a comment that is not just spaces.
+export function isValidRejectionComment(comment: string | null | undefined): boolean {
+  return typeof comment === "string" && comment.trim().length > 0;
+}
+
+// Throws a ValidationError when rule 5 is broken.
+export function assertValidRejectionComment(comment: string | null | undefined): void {
+  if (!isValidRejectionComment(comment)) {
+    const message = "A comment is required to reject a request.";
+    throw new ValidationError(message, [{ field: "comment", message }]);
+  }
 }
 
 /**

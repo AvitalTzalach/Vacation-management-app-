@@ -7,9 +7,17 @@
 import { getDataSource } from "./database/data-source";
 import { LoginCommand, LoginHandler } from "./modules/auth/login.command";
 import {
+  ApproveVacationRequestCommand,
+  ApproveVacationRequestHandler,
+} from "./modules/vacation-requests/commands/approve-vacation-request.command";
+import {
   CreateVacationRequestCommand,
   CreateVacationRequestHandler,
 } from "./modules/vacation-requests/commands/create-vacation-request.command";
+import {
+  RejectVacationRequestCommand,
+  RejectVacationRequestHandler,
+} from "./modules/vacation-requests/commands/reject-vacation-request.command";
 import { registerAuditLogSubscriber } from "./modules/vacation-requests/audit-log.subscriber";
 import { CommandBus } from "./shared/cqrs/command-bus";
 import { EventBus } from "./shared/cqrs/event-bus";
@@ -34,6 +42,14 @@ function createContainer(): AppContainer {
   commandBus.register(
     CreateVacationRequestCommand,
     new CreateVacationRequestHandler(getDataSource, eventBus)
+  );
+  commandBus.register(
+    ApproveVacationRequestCommand,
+    new ApproveVacationRequestHandler(getDataSource, eventBus)
+  );
+  commandBus.register(
+    RejectVacationRequestCommand,
+    new RejectVacationRequestHandler(getDataSource, eventBus)
   );
 
   return { commandBus, eventBus };
