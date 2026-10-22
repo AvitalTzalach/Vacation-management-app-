@@ -68,12 +68,6 @@ export function formatMonth(month: string): string {
   return new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeric" }).format(parseIsoDate(`${month}-01`));
 }
 
-// True for Saturday and Sunday.
-export function isWeekend(isoDate: string): boolean {
-  const day = parseIsoDate(isoDate).getDay();
-  return day === 0 || day === 6;
-}
-
 const displayFormat = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
   month: "short",

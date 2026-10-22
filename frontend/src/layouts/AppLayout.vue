@@ -39,12 +39,12 @@ function signOut(): void {
       <img
         :src="heroImage"
         alt=""
-        class="absolute inset-0 -z-20 size-full object-cover object-[center_40%]"
+        class="absolute inset-0 -z-20 size-full object-cover object-[center_72%]"
       />
       <!-- The misty photo is very light: a soft dark gradient keeps the white text readable. -->
       <div class="absolute inset-0 -z-10 bg-gradient-to-r from-slate-900/55 via-slate-900/30 to-slate-900/10" />
 
-      <div class="mx-auto max-w-6xl px-5 pt-4 pb-6 sm:px-8 sm:pb-7">
+      <div class="mx-auto max-w-6xl px-5 pt-4 pb-8 sm:px-8 sm:pb-11">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <RouterLink :to="{ name: 'home' }" class="font-display text-2xl text-white">Away</RouterLink>
 
@@ -64,7 +64,7 @@ function signOut(): void {
           </nav>
         </div>
 
-        <div class="mt-5 sm:mt-7">
+        <div class="mt-7 sm:mt-10">
           <p v-if="auth.user" class="text-xs font-medium text-white/85 sm:text-sm">
             {{ auth.user.name }} · {{ auth.user.role }}
           </p>

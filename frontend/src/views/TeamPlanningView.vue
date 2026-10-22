@@ -2,7 +2,7 @@
   TeamPlanningView (Requester and Validator): who is away, and when — one month at a time.
 
   - Grid: one row per employee with an approved absence in the month, one column per day.
-    Approved days are turquoise, weekends are shaded, today's column is highlighted.
+    Approved days are turquoise and today's column is highlighted.
   - The month is kept in the URL (?month=2026-10), so Previous / Next work with refresh and back.
   - Only Approved requests are shown (the API never returns reasons or comments).
   - On small screens the grid scrolls horizontally inside its card, with the names column pinned.
@@ -20,7 +20,6 @@ import {
   formatDate,
   formatMonth,
   isValidMonth,
-  isWeekend,
   monthBounds,
   todayIso,
 } from "@/utils/dates";
@@ -41,7 +40,7 @@ const today = todayIso();
 const days = computed(() =>
   Array.from({ length: daysInMonth(month.value) }, (_, index) => {
     const date = `${month.value}-${String(index + 1).padStart(2, "0")}`;
-    return { number: index + 1, date, weekend: isWeekend(date), today: date === today };
+    return { number: index + 1, date, today: date === today };
   })
 );
 
@@ -138,7 +137,7 @@ function absenceLabel(name: string, absence: TeamPlanningEntry): string {
 
     <!-- First load: skeleton -->
     <div v-else-if="loading && rows.length === 0" class="mt-4 space-y-3" aria-label="Loading">
-      <div v-for="n in 3" :key="n" class="h-7 animate-pulse rounded-lg bg-sand-100" />
+      <div v-for="n in 3" :key="n" class="h-9 animate-pulse rounded-lg bg-sand-100" />
     </div>
 
     <!-- Empty month -->
@@ -166,9 +165,9 @@ function absenceLabel(name: string, absence: TeamPlanningEntry): string {
               v-for="day in days"
               :key="day.date"
               scope="col"
-              class="min-w-6 text-center text-xs font-normal"
+              class="min-w-6 pb-1 text-center text-[0.8rem] font-normal"
               :data-today="day.today || undefined"
-              :class="day.today ? 'font-semibold text-brand-700' : day.weekend ? 'text-stone-400' : 'text-stone-500'"
+              :class="day.today ? 'font-semibold text-brand-700' : 'text-stone-500'"
             >
               {{ day.number }}
             </th>
@@ -176,14 +175,14 @@ function absenceLabel(name: string, absence: TeamPlanningEntry): string {
         </thead>
         <tbody>
           <tr v-for="row in rows" :key="row.userId">
-            <th scope="row" class="sticky left-0 z-10 bg-white pr-3 text-left text-sm font-normal whitespace-nowrap text-stone-800">
+            <th scope="row" class="sticky left-0 z-10 bg-white pr-3 text-left text-[0.95rem] font-normal whitespace-nowrap text-stone-800">
               {{ row.name }}
             </th>
             <td v-for="(absence, index) in row.cells" :key="days[index].date" class="p-0">
               <div
-                class="h-7 rounded-md"
+                class="h-9 rounded-md"
                 :class="[
-                  absence ? 'bg-brand-500' : days[index].weekend ? 'bg-sand-300/60' : 'bg-sand-100',
+                  absence ? 'bg-brand-500' : 'bg-sand-100',
                   days[index].today ? 'ring-2 ring-brand-300 ring-offset-1' : '',
                 ]"
                 :title="absence ? absenceLabel(row.name, absence) : undefined"
@@ -197,9 +196,8 @@ function absenceLabel(name: string, absence: TeamPlanningEntry): string {
     </div>
 
     <!-- Legend -->
-    <div class="mt-4 flex flex-wrap items-center gap-5 text-xs text-stone-500">
+    <div class="mt-4 flex flex-wrap items-center gap-5 text-sm text-stone-500">
       <span class="flex items-center gap-2"><span class="size-3 rounded-sm bg-brand-500" /> Approved</span>
-      <span class="flex items-center gap-2"><span class="size-3 rounded-sm bg-sand-300/60" /> Weekend</span>
       <span class="flex items-center gap-2"><span class="size-3 rounded-sm ring-2 ring-brand-300" /> Today</span>
     </div>
   </section>
