@@ -46,7 +46,7 @@ function signOut(): void {
 
       <div class="mx-auto max-w-6xl px-5 pt-4 pb-8 sm:px-8 sm:pb-11">
         <div class="flex flex-wrap items-center justify-between gap-3">
-          <RouterLink :to="{ name: 'home' }" class="font-display text-2xl text-white">Away</RouterLink>
+          <RouterLink :to="{ name: 'home' }" class="font-display text-3xl leading-none text-white sm:text-4xl">Away</RouterLink>
 
           <nav class="flex flex-wrap items-center gap-1 text-sm text-white/90" aria-label="Main">
             <RouterLink
