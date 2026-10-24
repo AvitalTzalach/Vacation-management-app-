@@ -30,6 +30,20 @@ export function getErrorMessage(error: unknown, fallback = "Something went wrong
   return fallback;
 }
 
+// The request that blocks a new one (409 overlap), as sent in `details.conflictingRequest`.
+export interface ConflictingRequest {
+  id: number;
+  startDate: string;
+  endDate: string;
+  status: string;
+}
+
+// Returns the conflicting request of an overlap error, or null for any other error.
+export function getConflictingRequest(error: unknown): ConflictingRequest | null {
+  const details = getApiError(error)?.details as { conflictingRequest?: ConflictingRequest } | undefined;
+  return details?.conflictingRequest ?? null;
+}
+
 /**
  * Field-level validation errors returned by the API (400), as { field: message },
  * so forms can show each message next to its input.

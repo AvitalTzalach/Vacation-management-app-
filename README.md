@@ -185,7 +185,7 @@ container. The demo data is never touched.
 | Input validation, error handling, pagination, RBAC | Zod schemas, uniform error body, `{ data, meta }` pages, role check before validation |
 | Users / VacationRequests schema | Column names exactly as specified (snake_case) |
 | Vue Router, Axios | Router with auth and role guards; Axios instance with JWT and 401 interceptors |
-| Reusable components | `StatusBadge`, `Pagination`, `DataTable`, `ConfirmModal`, `RequestForm` |
+| Reusable components | `StatusBadge`, `Pagination`, `DataTable`, `ConfirmModal`, `RequestForm` (+ `AlertMessage`, `Spinner`) |
 
 ---
 
@@ -311,7 +311,7 @@ with another HTTP framework would only touch `src/handlers` and `src/index.ts`.
         ├── stores/auth.ts             Pinia: token + user (localStorage)
         ├── router.ts                  Routes + auth / role guards
         ├── layouts/AppLayout.vue      Banner, navigation by role
-        ├── components/                StatusBadge, Pagination, DataTable, ConfirmModal, RequestForm, Spinner
+        ├── components/                StatusBadge, Pagination, DataTable, ConfirmModal, RequestForm, AlertMessage, Spinner
         ├── views/                     Login, MyRequests, ValidatorDashboard, TeamPlanning
         └── utils/                     Dates, API error messages
 ```
@@ -472,6 +472,7 @@ users ... LIMIT`, one `COUNT`), whatever the page size: no N+1.
 | `DataTable` | Generic typed table (`generic="T"`), per-column slots, built-in loading / empty states, cards on mobile |
 | `ConfirmModal` | Accessible dialog (focus management, Escape), optional required comment, loading and error states |
 | `RequestForm` | Start / end / reason with client-side rule checks and server field errors |
+| `AlertMessage` | Every notification: success messages close by themselves after 5 s, errors stay until closed with ×; the timer pauses on hover / focus |
 
 **Images**: both photos are stored locally (`frontend/src/assets/images/`): `login-beach.jpg` for the
 login screen, `hero-mountains.jpg` for the banner of the inner pages. No image is hot-linked.

@@ -8,15 +8,19 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { createVacationRequest, listMyVacationRequests } from "@/api/vacationRequests";
+import AlertMessage from "@/components/AlertMessage.vue";
 import Pagination from "@/components/Pagination.vue";
 import RequestForm from "@/components/RequestForm.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
 import type { CreateVacationRequestPayload, Paginated, VacationRequest } from "@/types";
-import { getErrorMessage, getErrorStatus, getFieldErrors } from "@/utils/api-errors";
+import { getConflictingRequest, getErrorMessage, getErrorStatus, getFieldErrors } from "@/utils/api-errors";
 import { countDays, formatDate } from "@/utils/dates";
 
 // Requests per page (small, so the list stays next to the form without scrolling).
 const PAGE_SIZE = 5;
+
+// How long a success message stays on screen.
+const SUCCESS_MESSAGE_MS = 5000;
 
 // --- List state ---
 const page = ref(1);
@@ -53,6 +57,19 @@ function changePage(newPage: number): void {
   loadRequests();
 }
 
+/**
+ * For an overlap (409), rebuilds the message with dates in the app's display format
+ * ("22 Oct 2026" instead of the API's "2026-10-22"). Returns null for any other error.
+ */
+function overlapMessage(error: unknown): string | null {
+  const conflict = getConflictingRequest(error);
+  if (!conflict) return null;
+  return (
+    `These dates overlap your ${conflict.status.toLowerCase()} request ` +
+    `from ${formatDate(conflict.startDate)} to ${formatDate(conflict.endDate)}.`
+  );
+}
+
 async function submitRequest(payload: CreateVacationRequestPayload): Promise<void> {
   submitting.value = true;
   submitError.value = null;
@@ -69,7 +86,7 @@ async function submitRequest(payload: CreateVacationRequestPayload): Promise<voi
     fieldErrors.value = getErrorStatus(error) === 400 ? getFieldErrors(error) : {};
     // Errors not tied to a field (overlap 409, network...) are shown above the form.
     if (Object.keys(fieldErrors.value).length === 0) {
-      submitError.value = getErrorMessage(error, "Could not submit the request.");
+      submitError.value = overlapMessage(error) ?? getErrorMessage(error, "Could not submit the request.");
     }
   } finally {
     submitting.value = false;
@@ -85,20 +102,20 @@ onMounted(loadRequests);
     <section class="card p-5 sm:p-6" aria-labelledby="new-request-title">
       <h2 id="new-request-title" class="text-lg font-semibold text-stone-900">New request</h2>
 
-      <div
+      <!-- Success: disappears after a few seconds. Error: stays until closed or until the next submit. -->
+      <AlertMessage
         v-if="successMessage"
-        class="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
-        role="status"
+        :key="successMessage"
+        class="mt-4"
+        tone="success"
+        :auto-dismiss-ms="SUCCESS_MESSAGE_MS"
+        @dismiss="successMessage = null"
       >
         {{ successMessage }}
-      </div>
-      <div
-        v-if="submitError"
-        class="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-        role="alert"
-      >
+      </AlertMessage>
+      <AlertMessage v-if="submitError" :key="submitError" class="mt-4" tone="error" @dismiss="submitError = null">
         {{ submitError }}
-      </div>
+      </AlertMessage>
 
       <RequestForm
         ref="formRef"

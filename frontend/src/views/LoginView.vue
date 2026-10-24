@@ -11,6 +11,7 @@
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import beachImage from "@/assets/images/login-beach.jpg";
+import AlertMessage from "@/components/AlertMessage.vue";
 import Spinner from "@/components/Spinner.vue";
 import { homeRouteFor } from "@/router";
 import { useAuthStore } from "@/stores/auth";
@@ -32,8 +33,11 @@ watch(password, (value) => {
 const submitting = ref(false);
 const errorMessage = ref<string | null>(null);
 
-// Set by the 401 interceptor when a session expires.
-const sessionExpired = computed(() => route.query.reason === "expired" && !errorMessage.value);
+// "?reason=expired" is set by the 401 interceptor when a session expires. The notice can be closed.
+const expiredNoticeClosed = ref(false);
+const sessionExpired = computed(
+  () => route.query.reason === "expired" && !errorMessage.value && !expiredNoticeClosed.value
+);
 
 // Only accepts internal paths ("/my-requests"), never another site ("//evil.com", "https://...").
 function safeRedirect(value: unknown): string | null {
@@ -62,7 +66,8 @@ async function submit(): Promise<void> {
 </script>
 
 <template>
-  <div class="min-h-screen bg-sand-50 lg:grid lg:grid-cols-2">
+  <!-- On large screens the photo takes 3/5 of the width and the form 2/5. -->
+  <div class="min-h-screen bg-sand-50 lg:grid lg:grid-cols-[3fr_2fr]">
     <!-- Photo panel -->
     <aside class="relative isolate h-40 overflow-hidden sm:h-56 lg:h-auto lg:min-h-screen">
       <img
@@ -80,25 +85,17 @@ async function submit(): Promise<void> {
     <!-- Sign-in panel -->
     <main class="flex items-center justify-center px-5 py-8 sm:px-8 lg:py-0">
       <div class="w-full max-w-sm">
-        <p class="font-display text-3xl text-brand-600">Away</p>
-        <h1 class="mt-4 text-xl font-semibold text-stone-900">Welcome back</h1>
+        <p class="font-display text-6xl leading-none text-brand-600 sm:text-7xl">Away</p>
+        <h1 class="mt-6 text-xl font-semibold text-stone-900">Welcome back</h1>
         <p class="mt-0.5 text-sm text-stone-500">Sign in to manage vacation requests.</p>
 
-        <div
-          v-if="sessionExpired"
-          class="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
-          role="status"
-        >
+        <AlertMessage v-if="sessionExpired" class="mt-6" tone="warning" @dismiss="expiredNoticeClosed = true">
           Your session has expired. Please sign in again.
-        </div>
+        </AlertMessage>
 
-        <div
-          v-if="errorMessage"
-          class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-          role="alert"
-        >
+        <AlertMessage v-if="errorMessage" :key="errorMessage" class="mt-6" tone="error" @dismiss="errorMessage = null">
           {{ errorMessage }}
-        </div>
+        </AlertMessage>
 
         <form class="mt-5 space-y-4" novalidate @submit.prevent="submit">
           <div>

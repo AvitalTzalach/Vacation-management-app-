@@ -10,7 +10,7 @@
     dialog closes, the message is shown, and the list is reloaded.
 -->
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter, type LocationQuery } from "vue-router";
 import { listUsers } from "@/api/users";
 import {
@@ -18,6 +18,7 @@ import {
   listAllVacationRequests,
   rejectVacationRequest,
 } from "@/api/vacationRequests";
+import AlertMessage from "@/components/AlertMessage.vue";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import DataTable, { type DataTableColumn } from "@/components/DataTable.vue";
 import Pagination from "@/components/Pagination.vue";
@@ -136,14 +137,14 @@ async function loadRequests(): Promise<void> {
 watch(() => route.query, loadRequests);
 
 // --- Notices (success / error after an action) ---
-const notice = ref<{ tone: "success" | "error"; text: string } | null>(null);
-let noticeTimer: ReturnType<typeof setTimeout> | undefined;
+// Success notices disappear after SUCCESS_NOTICE_MS; errors stay until closed (see AlertMessage).
+const SUCCESS_NOTICE_MS = 5000;
+const notice = ref<{ id: number; tone: "success" | "error"; text: string } | null>(null);
+// Each notice gets a new id, used as its :key, so even an identical text restarts the timer.
+let noticeId = 0;
 
 function showNotice(tone: "success" | "error", text: string): void {
-  notice.value = { tone, text };
-  clearTimeout(noticeTimer);
-  // Success messages disappear by themselves; errors stay until the next action.
-  if (tone === "success") noticeTimer = setTimeout(() => (notice.value = null), 5000);
+  notice.value = { id: ++noticeId, tone, text };
 }
 
 // --- Approve / reject ---
@@ -200,8 +201,6 @@ onMounted(() => {
   loadUsers();
   loadRequests();
 });
-
-onBeforeUnmount(() => clearTimeout(noticeTimer));
 </script>
 
 <template>
@@ -243,18 +242,16 @@ onBeforeUnmount(() => clearTimeout(noticeTimer));
     </div>
 
     <!-- Notice after an action -->
-    <div
+    <AlertMessage
       v-if="notice"
-      class="mt-5 rounded-2xl border px-4 py-3 text-sm"
-      :class="
-        notice.tone === 'success'
-          ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-          : 'border-rose-200 bg-rose-50 text-rose-700'
-      "
-      :role="notice.tone === 'success' ? 'status' : 'alert'"
+      :key="notice.id"
+      class="mt-5"
+      :tone="notice.tone"
+      :auto-dismiss-ms="notice.tone === 'success' ? SUCCESS_NOTICE_MS : 0"
+      @dismiss="notice = null"
     >
       {{ notice.text }}
-    </div>
+    </AlertMessage>
 
     <!-- Load error -->
     <div
@@ -329,6 +326,7 @@ onBeforeUnmount(() => clearTimeout(noticeTimer));
     comment-label="Reason for rejection"
     comment-placeholder="Explain why, so the employee can pick other dates."
     :comment-max-length="COMMENT_MAX_LENGTH"
+    comment-required-message="A comment is required to reject a request."
     :loading="actionLoading"
     :error="actionError"
     @confirm="confirmAction"

@@ -1,14 +1,17 @@
 <!--
   ConfirmModal: reusable confirmation dialog.
 
-  - Optional comment field (`withComment`); when `commentRequired` is set, the confirm button
-    stays disabled until the comment has non-blank text (used for "reject": rule 5).
+  - Optional comment field (`withComment`). When `commentRequired` is set and the user confirms
+    with an empty or blank comment, the field turns red, `commentRequiredMessage` explains why,
+    and focus goes back to the field (used for "reject": rule 5). The confirm button is never
+    disabled for this reason: a disabled button without an explanation is confusing.
   - `loading` disables everything while the parent calls the API; `error` shows the API's message.
   - Accessible: role="dialog", focus moves into the dialog when it opens and back to the
     previously focused element when it closes, Escape and a click outside cancel (not while loading).
 -->
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from "vue";
+import AlertMessage from "@/components/AlertMessage.vue";
 import Spinner from "@/components/Spinner.vue";
 
 const props = withDefaults(
@@ -25,6 +28,8 @@ const props = withDefaults(
     commentLabel?: string;
     commentPlaceholder?: string;
     commentMaxLength?: number;
+    // Message shown under the comment field when a required comment is missing.
+    commentRequiredMessage?: string;
     loading?: boolean;
     error?: string | null;
   }>(),
@@ -38,6 +43,7 @@ const props = withDefaults(
     commentLabel: "Comment",
     commentPlaceholder: "",
     commentMaxLength: 1000,
+    commentRequiredMessage: "This field is required.",
     loading: false,
     error: null,
   }
@@ -53,15 +59,24 @@ const dialogRef = ref<HTMLElement | null>(null);
 const commentRef = ref<HTMLTextAreaElement | null>(null);
 let previouslyFocused: HTMLElement | null = null;
 
-const canConfirm = computed(() => !props.loading && (!props.commentRequired || comment.value.trim().length > 0));
+// Error shown under the comment field after a confirm attempt without a required comment.
+const commentError = ref<string | null>(null);
 
-// On open: clear the comment and move focus inside. On close: give focus back.
+const isCommentMissing = computed(() => props.commentRequired && comment.value.trim().length === 0);
+
+// As soon as the user types real text, the error disappears.
+watch(comment, () => {
+  if (!isCommentMissing.value) commentError.value = null;
+});
+
+// On open: clear the comment and its error, and move focus inside. On close: give focus back.
 watch(
   () => props.open,
   async (isOpen) => {
     if (isOpen) {
       previouslyFocused = document.activeElement as HTMLElement | null;
       comment.value = "";
+      commentError.value = null;
       await nextTick();
       (commentRef.value ?? dialogRef.value)?.focus();
     } else {
@@ -74,8 +89,15 @@ function cancel(): void {
   if (!props.loading) emit("cancel");
 }
 
+// Validates the required comment, then emits `confirm`.
 function confirm(): void {
-  if (canConfirm.value) emit("confirm", comment.value.trim());
+  if (props.loading) return;
+  if (isCommentMissing.value) {
+    commentError.value = props.commentRequiredMessage;
+    commentRef.value?.focus();
+    return;
+  }
+  emit("confirm", comment.value.trim());
 }
 </script>
 
@@ -114,19 +136,22 @@ function confirm(): void {
               v-model="comment"
               rows="3"
               class="field-input resize-none"
+              :class="{ 'field-input-error': commentError }"
               :placeholder="commentPlaceholder"
               :maxlength="commentMaxLength"
               :disabled="loading"
+              :aria-invalid="Boolean(commentError)"
+              aria-describedby="confirm-modal-comment-error"
             />
+            <p v-if="commentError" id="confirm-modal-comment-error" class="field-error" role="alert">
+              {{ commentError }}
+            </p>
           </div>
 
-          <div
-            v-if="error"
-            class="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-            role="alert"
-          >
+          <!-- No × here: the error disappears with the dialog or on the next attempt. -->
+          <AlertMessage v-if="error" class="mt-4" tone="error" :dismissible="false">
             {{ error }}
-          </div>
+          </AlertMessage>
 
           <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button type="button" class="btn-secondary" :disabled="loading" @click="cancel">{{ cancelLabel }}</button>
@@ -137,7 +162,7 @@ function confirm(): void {
                   ? 'btn-primary bg-rose-600 hover:bg-rose-700 focus-visible:ring-rose-200'
                   : 'btn-primary'
               "
-              :disabled="!canConfirm"
+              :disabled="loading"
               @click="confirm"
             >
               <Spinner v-if="loading" class="size-4" />
